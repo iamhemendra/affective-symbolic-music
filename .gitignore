@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+*.wav
+*.mid
+*.midi
+assets/*.sf2
+generated_*.mid
+generated_*.wav
