@@ -21,3 +21,46 @@ An end-to-end conditional generative sequence framework mapping real-time 7-emot
 ```bash
 pip install -r requirements.txt
 python app.py
+```
+
+> **Note:** The app requires trained model checkpoints to run. See the [Training](#training) section below before launching the app for the first time.
+
+## Training
+
+The generative models must be trained locally before running the app. Pre-trained checkpoints are not included in this repository due to file size constraints.
+
+### Dataset
+This project uses the [EMOPIA dataset](https://zenodo.org/record/5090631) — a publicly available collection of emotion-labelled piano MIDI recordings categorised across Russell's four affect quadrants (Q1: Happy, Q2: Angry, Q3: Sad, Q4: Relaxed). The training script downloads it automatically (~180 MB).
+
+### Dependencies
+Install the `requests` library if not already present:
+```bash
+pip install requests
+```
+
+### Train All 4 Quadrants
+```bash
+python train.py
+```
+
+### Train a Single Quadrant
+```bash
+python train.py --quadrant Q1
+```
+
+Checkpoints are saved to `checkpoints/model_Q1/` through `checkpoints/model_Q4/`.
+
+### Hardware Requirements
+
+| Hardware | Estimated Time per Quadrant |
+|---|---|
+| NVIDIA GPU (fp16 enabled) | ~10–15 minutes |
+| CPU only | ~45–60 minutes |
+
+Mixed precision (`fp16`) is enabled by default and requires an NVIDIA GPU. Training automatically falls back to CPU if no GPU is detected.
+
+### PyTorch + CUDA Setup
+Ensure you have the CUDA-enabled build of PyTorch installed:
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+```
