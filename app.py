@@ -1,7 +1,10 @@
 import gradio as gr
+
 from src.sentiment import map_text_to_quadrant
 from src.vision import analyze_facial_affect
 from src.generator import generate_track
+from src.accuracy_ui import load_results, render_banner, render_accuracy_html
+
 
 def handle_webcam(image):
     if image is None:
@@ -14,6 +17,7 @@ def handle_webcam(image):
     except Exception as e:
         return f"❌ Error: {str(e)}", None, None
 
+
 def handle_text(text):
     if not text or not text.strip():
         return "⚠️ Please enter a text prompt.", None, None
@@ -25,9 +29,16 @@ def handle_text(text):
     except Exception as e:
         return f"❌ Error: {str(e)}", None, None
 
+
+def refresh_accuracy():
+    res = load_results()
+    return render_banner(res), render_accuracy_html(res)
+
+
 with gr.Blocks(title="Emotion-Conditioned Symbolic Music AI") as demo:
     gr.Markdown("# 🎹 Emotion-Conditioned Symbolic Music AI")
     gr.Markdown("Real-time symbolic piano composition conditioned on facial expressions (7 emotions) or text sentiments.")
+    banner = gr.HTML(render_banner(load_results()))  # headline accuracy, always visible
 
     with gr.Tabs():
         with gr.TabItem("📷 Live Webcam / Upload"):
@@ -39,7 +50,6 @@ with gr.Blocks(title="Emotion-Conditioned Symbolic Music AI") as demo:
                     status_cam = gr.Markdown("Status: Ready.")
                     audio_cam = gr.Audio(label="Synthesized Piano Audio", type="filepath")
                     file_cam = gr.File(label="Download MIDI (.mid)")
-
             btn_cam.click(fn=handle_webcam, inputs=[webcam_in], outputs=[status_cam, audio_cam, file_cam])
 
         with gr.TabItem("✍️ Text Sentiment"):
@@ -51,8 +61,14 @@ with gr.Blocks(title="Emotion-Conditioned Symbolic Music AI") as demo:
                     status_text = gr.Markdown("Status: Ready.")
                     audio_text = gr.Audio(label="Synthesized Piano Audio", type="filepath")
                     file_text = gr.File(label="Download MIDI (.mid)")
-
             btn_text.click(fn=handle_text, inputs=[text_in], outputs=[status_text, audio_text, file_text])
+
+        with gr.TabItem("📊 Model Accuracy"):
+            acc_html = gr.HTML(render_accuracy_html(load_results()))
+            btn_refresh = gr.Button("🔄 Reload results")
+            btn_refresh.click(fn=refresh_accuracy, outputs=[banner, acc_html])
+
+    demo.load(fn=refresh_accuracy, outputs=[banner, acc_html])
 
 if __name__ == "__main__":
     demo.launch()
